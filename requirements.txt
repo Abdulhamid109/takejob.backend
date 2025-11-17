@@ -1,0 +1,7 @@
+uvicorn
+pydantic
+joblib
+requests
+pdfplumber
+python-dotenv
+fastapi
