@@ -38,11 +38,11 @@ def pdfpipeline(file_path:Doc_data):
       response.raise_for_status()  
  
       pdf_file = BytesIO(response.content)
-    with pdfplumber.open(pdf_file) as pdf:
-        text = ""
-        for page in pdf.pages:
-                text += page.extract_text() or ""
-        return text
+      with pdfplumber.open(pdf_file) as pdf:
+          text = ""
+          for page in pdf.pages:
+                  text += page.extract_text() or ""
+          return text
   except Exception as e:
       return f"Error: {str(e)}"
   
