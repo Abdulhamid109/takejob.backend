@@ -31,19 +31,28 @@ def starter():
         return {'Message':"Backend running fruitfully"}
  
 @app.post('/extractresume')
-def pdfpipeline(file_path:Doc_data):
-  try:
-    if file_path.resume_link.endswith('.pdf'):
-      response = requests.get(file_path.resume_link)
-      response.raise_for_status()  
- 
-      pdf_file = BytesIO(response.content)
-      with pdfplumber.open(pdf_file) as pdf:
-          text = ""
-          for page in pdf.pages:
-                  text += page.extract_text() or ""
-          return text
-  except Exception as e:
-      return f"Error: {str(e)}"
-  
-
+def pdfpipeline(file_path: Doc_data):
+    try:
+        if not file_path.resume_link.endswith('.pdf'):
+            return {"error": "Invalid file format. Only PDF files are supported."}
+        
+        response = requests.get(file_path.resume_link, timeout=30)
+        response.raise_for_status()
+        
+        pdf_file = BytesIO(response.content)
+        with pdfplumber.open(pdf_file) as pdf:
+            text = ""
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+            
+            if not text.strip():
+                return {"error": "No text found in PDF"}
+            
+            return {"data":text.strip()}
+            
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to download PDF: {str(e)}"}
+    except Exception as e:
+        return {"error": f"Error processing PDF: {str(e)}"}
